@@ -39,7 +39,6 @@
             <br>
         </div>
 
-        <!-- Middle Column -->
         <div class="w3-col m7">
             <div class="w3-row-padding">
                 <div class="w3-col m12">
@@ -48,19 +47,19 @@
                             <h6 class="w3-opacity">Create a Post</h6>
                             <form id="postForm" data-role="post-form" method="POST">
                                 <input type="text" data-role="title" id="title" name="title" placeholder="Title" class="form-control mb-3" required><br>
+                                <br>
                                 <textarea name="description" data-role="description" id="description" rows="8" cols="80" placeholder="Description" class="form-control mb-3" required></textarea><br>
                                 <button type="submit" class="btn btn-primary">Post it</button>
+                                <br>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Posts Container -->
             <div id="postsContainer" data-role="post-container"></div>
         </div>
 
-        <!-- Right Column -->
         <div class="w3-col m2">
             <div class="w3-card w3-round w3-white w3-center">
                 <div class="w3-container"></div>
@@ -133,38 +132,12 @@
         });
     });
 
-// function likePost(button) {
-//     let parent =  $(button).parents("div");
-//     let post_id = parent.data("id");
-//     let currentCount = +parent.find(`[data-role="like-count"]`).html() ;
-//     $.ajax({
-//         type: 'POST',
-//         url: '<?= base_url("toggle-like") ?>',
-//         data: { post_id: post_id },
-//         dataType: 'json',
-//         success: function(response) {
-//             if (response.error) {
-//                 alert(response.error);
-//             } else {
-//                 if (response.liked) {
-//                     $(button).removeClass('w3-grey').addClass('w3-theme-d1');
-//                     parent.find(`[data-role="like-count"]`).html(currentCount + 1);
-//                 } else {
-//                     $(button).removeClass('w3-theme-d1').addClass('w3-grey');
-//                     parent.find(`[data-role="like-count"]`).html(currentCount - 1);
-//                 }
-//             }
-//         },
-//         error: function() {
-//             alert('Error toggling like');
-//         }
-//     });
-// }
+
 function likePost(button) {
-    let parent = $(button).closest("div"), // Find the closest div that represents the post
+    let parent = $(button).closest("div"),
         post_id = parent.data("id"),
-        currentCount = +parent.find(`[data-role="like-count"]`).text(), // Use .text() instead of .html() for fetching text
-        isLiked = $(button).hasClass('w3-theme-d1'); // Check if the button has the 'liked' class
+        currentCount = +parent.find(`[data-role="like-count"]`).text(),
+        isLiked = $(button).hasClass('w3-theme-d1');
 
     let data = {
       post_id
@@ -178,13 +151,12 @@ function likePost(button) {
             if (response.error) {
                 alert(response.error);
             } else {
-                // Update the like count and button style only for the current post
                 if (response.liked) {
-                    $(button).removeClass('w3-grey').addClass('w3-theme-d1'); // Change button color to indicate 'liked'
-                    parent.find(`[data-role="like-count"]`).text(currentCount + 1); // Increment like count
+                    $(button).removeClass('w3-grey').addClass('w3-theme-d1');
+                    parent.find(`[data-role="like-count"]`).text(currentCount + 1);
                 } else {
-                    $(button).removeClass('w3-theme-d1').addClass('w3-grey'); // Change button color to indicate 'not liked'
-                    parent.find(`[data-role="like-count"]`).text(currentCount - 1); // Decrement like count
+                    $(button).removeClass('w3-theme-d1').addClass('w3-grey');
+                    parent.find(`[data-role="like-count"]`).text(currentCount - 1);
                 }
             }
         },

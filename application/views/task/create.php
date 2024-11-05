@@ -13,6 +13,12 @@
     <div class="mb-3">
         <a href="<?= base_url("logout") ?>" data-toggle="tooltip" data-placement="top" class="btn btn-success">Logout</a>
     </div>
+      <div class="mb-3">
+    <a href="<?= base_url("community-page") ?>" data-toggle="tooltip" data-placement="top" title="Cedvel" class="btn btn-success">
+      Post
+    </a>
+  </div>
+
     <form method="post" action="<?= base_url("create") ?>" class="mt-4">
         <div class="form-group">
             <label for="name">Ad:</label>
