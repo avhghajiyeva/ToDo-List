@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
     <style>
         html, body, h1, h2, h3, h4, h5 { font-family: "Open Sans", sans-serif; }
     </style>
@@ -85,7 +87,8 @@
                         <hr class="w3-clear">
                         <p>${post.description}</p>
                         <p><strong>Likes: <span class="likeCount" data-role="like-count">${post.like_count}</span></strong></p>
-                        <button type="button" class="btn w3-margin-bottom likeBtn ${post.is_liked ? 'w3-theme-d1' : 'w3-grey'}" data-role="btn-like" onclick="likePost(this)">
+
+                        <button type="button" class="btn w3-margin-bottom likeBtn ${post.is_liked === "1" ? 'w3-theme-d1' : 'w3-grey'}" data-role="btn-like" onclick="likePost(this)">
                             <i class="fa fa-thumbs-up"></i> &nbsp;Like
                         </button>
                       </div>

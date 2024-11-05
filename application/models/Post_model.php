@@ -13,32 +13,34 @@ class Post_model extends CI_Model {
     }
 
     public function get_posts() {
-      $post_sql = "SELECT
-                          post.`id`,
-                          post.`user_id`,
-                          post.`title`,
-                          post.`description`,
-                          post.`like_count`,
-                          COUNT(likes.`id`) as like_count
-                   FROM `posts` post
-                   LEFT JOIN `likes` likes
-                    ON likes.`post_id` = post.`id`
-                   GROUP BY likes.`post_id`
-                   ORDER BY `created_at` ASC
-                  ";
+    // İstifadəçi sessiyasında olan user_id-ni əldə edirik
+    $session_user_id = $this->session->userdata('user_id');
 
-        $post_query = $this->db->query($post_sql);
+    $post_sql = "SELECT
+                    post.`id`,
+                    post.`user_id`,
+                    post.`title`,
+                    post.`description`,
+                    post.`like_count`,
+                    COUNT(likes.`id`) as like_count,
+                    (CASE WHEN likes.`user_id` = ? THEN 1 ELSE 0 END) as is_liked
+                 FROM `posts` post
+                 LEFT JOIN `likes` likes
+                 ON likes.`post_id` = post.`id`
+                 GROUP BY post.`id`
+                 ORDER BY post.`created_at` ASC";
 
-        if (!$post_query->num_rows()) {
-          return null;
-        }
+    // Sorğunu sessiya istifadəçi ID ilə icra edirik
+    $post_query = $this->db->query($post_sql, array($session_user_id));
 
-        $posts = $post_query->result_array();
-
-        foreach ($posts as $key => $post) {
-          $posts[$key]['is_liked'] = true;
-        }
-
-        return $posts;
+    if (!$post_query->num_rows()) {
+        return null;
     }
+
+    // Postları qaytarırıq
+    $posts = $post_query->result_array();
+
+    return $posts;
+}
+
   }
