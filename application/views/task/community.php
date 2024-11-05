@@ -46,9 +46,9 @@
                     <div class="w3-card w3-round w3-white">
                         <div class="w3-container w3-padding">
                             <h6 class="w3-opacity">Create a Post</h6>
-                            <form id="postForm" method="POST">
-                                <input type="text" id="title" name="title" placeholder="Title" class="form-control mb-3" required><br>
-                                <textarea name="description" id="description" rows="8" cols="80" placeholder="Description" class="form-control mb-3" required></textarea><br>
+                            <form id="postForm" data-role="post-form" method="POST">
+                                <input type="text" data-role="title" id="title" name="title" placeholder="Title" class="form-control mb-3" required><br>
+                                <textarea name="description" data-role="description" id="description" rows="8" cols="80" placeholder="Description" class="form-control mb-3" required></textarea><br>
                                 <button type="submit" class="btn btn-primary">Post it</button>
                             </form>
                         </div>
@@ -57,7 +57,7 @@
             </div>
 
             <!-- Posts Container -->
-            <div id="postsContainer"></div>
+            <div id="postsContainer" data-role="post-container"></div>
         </div>
 
         <!-- Right Column -->
@@ -73,42 +73,49 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function fetchPosts() {
-        $.ajax({
-            type: 'GET',
-            url: '<?= base_url("community") ?>',
-            dataType: 'json',
-            success: function(response) {
-                $('#postsContainer').empty();
-                $.each(response, function(index, post) {
-                    $('#postsContainer').prepend(`
-                      <div class="w3-container w3-card w3-white w3-round w3-margin" data-id="${post.id}">
-                        <h4>${post.title}</h4>
-                        <hr class="w3-clear">
-                        <p>${post.description}</p>
-                        <p><strong>Likes: <span class="likeCount" data-role="like-count">${post.like_count}</span></strong></p>
 
-                        <button type="button" class="btn w3-margin-bottom likeBtn ${post.is_liked === "1" ? 'w3-theme-d1' : 'w3-grey'}" data-role="btn-like" onclick="likePost(this)">
-                            <i class="fa fa-thumbs-up"></i> &nbsp;Like
-                        </button>
-                      </div>
+    const cardComponent = (v,i) => {
+      return `
+              <div class="w3-container w3-card w3-white w3-round w3-margin" data-id="${v.id}">
+                <h4>${v.title}</h4>
+                <hr class="w3-clear">
+                <p>${v.description}</p>
+                <p><strong>Likes: <span class="likeCount" data-role="like-count">${v.like_count}</span></strong></p>
 
-                    `);
-                });
-            },
-            error: function() {
-                alert('Error fetching posts');
-            }
-        });
+                <button type="button" class="btn w3-margin-bottom likeBtn ${v.is_liked === "1" ? 'w3-theme-d1' : 'w3-grey'}" data-role="btn-like" onclick="likePost(this)">
+                    <i class="fa fa-thumbs-up"></i> &nbsp;Like
+                </button>
+              </div>
+              `;
     }
 
-    fetchPosts();
+    const getContent = () => {
+      let html = ``;
 
-    $('#postForm').on('submit', function(e) {
+      $.get({
+          url: '<?= base_url("community") ?>',
+          dataType: 'json',
+          success: function(response) {
+              $(`[data-role="post-container"]`).empty();
+              html += response.map((v,i) => cardComponent(v,i)).join(``);
+              $(`[data-role="post-container"]`).html(html);
+          },
+          error: function() {
+              alert('Error fetching posts');
+          }
+      });
+    }
+
+    getContent();
+
+    $(`[data-role="post-form"]`).on('submit', function(e) {
         e.preventDefault();
 
-        $.ajax({
-            type: 'POST',
+        let data = {
+
+        }
+
+        $.post({
             url: '<?= base_url("submit-post") ?>',
             data: $(this).serialize(),
             dataType: 'json',
@@ -116,35 +123,68 @@
                 if (response.error) {
                     alert(response.error);
                 } else {
-                    $('#postForm')[0].reset();
+                    $(`[data-role="post-form"]`)[0].reset();
                     fetchPosts();
                 }
             },
             error: function() {
-                alert('Error submitting post');
+                console.error("Error submitting post");
             }
         });
     });
 
+// function likePost(button) {
+//     let parent =  $(button).parents("div");
+//     let post_id = parent.data("id");
+//     let currentCount = +parent.find(`[data-role="like-count"]`).html() ;
+//     $.ajax({
+//         type: 'POST',
+//         url: '<?= base_url("toggle-like") ?>',
+//         data: { post_id: post_id },
+//         dataType: 'json',
+//         success: function(response) {
+//             if (response.error) {
+//                 alert(response.error);
+//             } else {
+//                 if (response.liked) {
+//                     $(button).removeClass('w3-grey').addClass('w3-theme-d1');
+//                     parent.find(`[data-role="like-count"]`).html(currentCount + 1);
+//                 } else {
+//                     $(button).removeClass('w3-theme-d1').addClass('w3-grey');
+//                     parent.find(`[data-role="like-count"]`).html(currentCount - 1);
+//                 }
+//             }
+//         },
+//         error: function() {
+//             alert('Error toggling like');
+//         }
+//     });
+// }
 function likePost(button) {
-    let parent =  $(button).parents("div");
-    let post_id = parent.data("id");
-    let currentCount = +parent.find(`[data-role="like-count"]`).html() ;
-    $.ajax({
-        type: 'POST',
+    let parent = $(button).closest("div"), // Find the closest div that represents the post
+        post_id = parent.data("id"),
+        currentCount = +parent.find(`[data-role="like-count"]`).text(), // Use .text() instead of .html() for fetching text
+        isLiked = $(button).hasClass('w3-theme-d1'); // Check if the button has the 'liked' class
+
+    let data = {
+      post_id
+    }
+
+    $.post({
         url: '<?= base_url("toggle-like") ?>',
-        data: { post_id: post_id },
+        data: data,
         dataType: 'json',
         success: function(response) {
             if (response.error) {
                 alert(response.error);
             } else {
+                // Update the like count and button style only for the current post
                 if (response.liked) {
-                    $(button).removeClass('w3-grey').addClass('w3-theme-d1');
-                    parent.find(`[data-role="like-count"]`).html(currentCount + 1);
+                    $(button).removeClass('w3-grey').addClass('w3-theme-d1'); // Change button color to indicate 'liked'
+                    parent.find(`[data-role="like-count"]`).text(currentCount + 1); // Increment like count
                 } else {
-                    $(button).removeClass('w3-theme-d1').addClass('w3-grey');
-                    parent.find(`[data-role="like-count"]`).html(currentCount - 1);
+                    $(button).removeClass('w3-theme-d1').addClass('w3-grey'); // Change button color to indicate 'not liked'
+                    parent.find(`[data-role="like-count"]`).text(currentCount - 1); // Decrement like count
                 }
             }
         },
@@ -153,6 +193,8 @@ function likePost(button) {
         }
     });
 }
+
+
 </script>
 
 </body>
